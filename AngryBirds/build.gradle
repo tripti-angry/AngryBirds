@@ -1,73 +1,51 @@
-buildscript {
-  repositories {
-    mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org' }
-    gradlePluginPortal()
-    mavenLocal()
-    google()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
-  }
-  dependencies {
+apply plugin: "java"
 
+ext {
+  appName = "AngryBirds"
+  gdxVersion = '1.10.0' // Use your desired version
+}
 
+sourceCompatibility = 11 // Change to a more recent version if necessary
+sourceSets.main.java.srcDirs = [ "src/" ]
+
+project.ext.mainClassName = "io.github.some_example_name.AngryBirds"
+project.ext.assetsDir = new File("AngryBirds/assets")
+
+task run(dependsOn: classes, type: JavaExec) {
+  main = project.mainClassName
+  classpath = sourceSets.main.runtimeClasspath
+  standardInput = System.in
+  workingDir = project.assetsDir
+  ignoreExitValue = true
+}
+
+task dist(type: Jar) {
+  from files(sourceSets.main.output.classesDir)
+  from files(sourceSets.main.output.resourcesDir)
+  from { configurations.compile.collect { zipTree(it) } }
+  from files(project.assetsDir)
+
+  manifest {
+    attributes 'Main-Class': project.mainClassName
   }
 }
 
-allprojects {
-  apply plugin: 'eclipse'
-  apply plugin: 'idea'
+dist.dependsOn classes
 
-  // This allows you to "Build and run using IntelliJ IDEA", an option in IDEA's Settings.
-  idea {
-    module {
-      outputDir file('build/classes/java/main')
-      testOutputDir file('build/classes/java/test')
-    }
+eclipse {
+  project {
+    name = appName + "-desktop"
+    linkedResource name: 'assets', type: '2', location: 'PARENT-1-PROJECT_LOC/core/assets'
   }
 }
 
-configure(subprojects) {
-  apply plugin: 'java-library'
-  sourceCompatibility = 11
-
-  // From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/
-  // The article can be helpful when using assets.txt in your project.
-  tasks.register('generateAssetList') {
-    inputs.dir("${project.rootDir}/assets/")
-    // projectFolder/assets
-    File assetsFolder = new File("${project.rootDir}/assets/")
-    // projectFolder/assets/assets.txt
-    File assetsFile = new File(assetsFolder, "assets.txt")
-    // delete that file in case we've already created it
-    assetsFile.delete()
-
-    // iterate through all files inside that folder
-    // convert it to a relative path
-    // and append it to the file assets.txt
-    fileTree(assetsFolder).collect { assetsFolder.relativePath(it) }.each {
-      assetsFile.append(it + "\n")
-    }
-  }
-  processResources.dependsOn 'generateAssetList'
-
-  compileJava {
-    options.incremental = true
+task afterEclipseImport(description: "Post processing after project generation", group: "IDE") {
+  doLast {
+    def classpath = new XmlParser().parse(file(".classpath"))
+    new Node(classpath, "classpathentry", [ kind: 'src', path: 'assets' ])
+    def writer = new FileWriter(file(".classpath"))
+    def printer = new XmlNodePrinter(new PrintWriter(writer))
+    printer.setPreserveWhitespace(true)
+    printer.print(classpath)
   }
 }
-
-subprojects {
-  version = '$projectVersion'
-  ext.appName = 'AngryBirds'
-  repositories {
-    mavenCentral()
-    maven { url 'https://s01.oss.sonatype.org' }
-    // You may want to remove the following line if you have errors downloading dependencies.
-    mavenLocal()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots/' }
-    maven { url 'https://jitpack.io' }
-  }
-}
-
-eclipse.project.name = 'AngryBirds' + '-parent'
