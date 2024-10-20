@@ -22,12 +22,16 @@ public class MenuScreen implements Screen {
     private OrthographicCamera camera;
     private Viewport viewport;
     private Stage stage;
+    private Texture settingsTexture; // Texture for settings button
 
     public MenuScreen(MainGame game) {
         this.game = game;
 
         // Load the background image
         backgroundTexture = new Texture(Gdx.files.internal("angry-birds/background.png"));
+
+        // Load the settings button image
+        settingsTexture = new Texture(Gdx.files.internal("ui/settings.png"));
 
         // Create the camera and viewport
         camera = new OrthographicCamera();
@@ -87,6 +91,18 @@ public class MenuScreen implements Screen {
 
         // Add the exit table to the stage
         stage.addActor(exitTable);
+
+        // Add the settings button
+        ImageButton settingsButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(settingsTexture)));
+        settingsButton.setSize(100, 100);
+        settingsButton.setPosition(20, viewport.getWorldHeight() - 120); // Adjust position as needed
+        settingsButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                // Define what happens when the settings button is clicked
+            }
+        });
+        stage.addActor(settingsButton); // Add the settings button to the stage
     }
 
     @Override
@@ -134,6 +150,6 @@ public class MenuScreen implements Screen {
     public void dispose() {
         stage.dispose();
         backgroundTexture.dispose();
+        settingsTexture.dispose(); // Dispose of settings texture
     }
 }
-
