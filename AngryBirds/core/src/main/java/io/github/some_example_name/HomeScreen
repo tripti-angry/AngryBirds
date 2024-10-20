@@ -23,8 +23,8 @@ public class HomeScreen implements Screen {
 
         // Create the camera and viewport
         camera = new OrthographicCamera();
-        // Create a FitViewport with base width and height matching your image or desired aspect ratio
-        viewport = new FitViewport(homeScreenImage.getWidth(), homeScreenImage.getHeight(), camera);
+        // Create a FitViewport with base width and height for the viewport
+        viewport = new FitViewport(1920, 1080, camera); // Set to your desired screen resolution
 
         // Apply the initial viewport configuration
         viewport.apply();
@@ -32,26 +32,34 @@ public class HomeScreen implements Screen {
 
     @Override
     public void show() {
-        // This method will be called when this screen is set.
+        // Transition to MenuScreen after a short delay
+        Gdx.app.postRunnable(() -> {
+            try {
+                Thread.sleep(2000); // Delay for 2 seconds
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            game.setScreen(new MenuScreen(game)); // Switch to MenuScreen
+        });
     }
 
     @Override
     public void render(float delta) {
         // Clear the screen with a black background
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);  // Clear the screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Update the camera
+        // Set the camera
         camera.update();
-
-        // Set the projection matrix for the SpriteBatch to match the camera
         game.batch.setProjectionMatrix(camera.combined);
 
-        // Render the image
+        // Start drawing the background
         game.batch.begin();
-        // Draw the image at (0, 0) because the viewport centers it
-        game.batch.draw(homeScreenImage, 0, 0, homeScreenImage.getWidth(), homeScreenImage.getHeight());
+        // Fill the entire viewport with the background texture
+        game.batch.draw(homeScreenImage, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
+
+
     }
 
     @Override
