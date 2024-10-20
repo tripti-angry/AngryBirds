@@ -1,0 +1,79 @@
+package io.github.some_example_name;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
+public class HomeScreen implements Screen {
+
+    private MainGame game;              // Reference to the main game
+    private Texture homeScreenImage;     // Single image for the home screen
+    private OrthographicCamera camera;   // Camera to control the view
+    private Viewport viewport;           // Viewport to handle resizing
+
+    public HomeScreen(MainGame game) {
+        this.game = game;
+
+        // Load the home screen image (replace with your actual image path)
+        homeScreenImage = new Texture(Gdx.files.internal("angry-birds/home_page.png"));
+
+        // Create the camera and viewport
+        camera = new OrthographicCamera();
+        // Create a FitViewport with base width and height matching your image or desired aspect ratio
+        viewport = new FitViewport(homeScreenImage.getWidth(), homeScreenImage.getHeight(), camera);
+
+        // Apply the initial viewport configuration
+        viewport.apply();
+    }
+
+    @Override
+    public void show() {
+        // This method will be called when this screen is set.
+    }
+
+    @Override
+    public void render(float delta) {
+        // Clear the screen with a black background
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // Update the camera
+        camera.update();
+
+        // Set the projection matrix for the SpriteBatch to match the camera
+        game.batch.setProjectionMatrix(camera.combined);
+
+        // Render the image
+        game.batch.begin();
+        // Draw the image at (0, 0) because the viewport centers it
+        game.batch.draw(homeScreenImage, 0, 0, homeScreenImage.getWidth(), homeScreenImage.getHeight());
+        game.batch.end();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        // Update the viewport to adjust to the new window size
+        viewport.update(width, height);
+        camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
+        camera.update();
+    }
+
+    @Override
+    public void pause() {}
+
+    @Override
+    public void resume() {}
+
+    @Override
+    public void hide() {}
+
+    @Override
+    public void dispose() {
+        // Dispose of assets when done
+        homeScreenImage.dispose();
+    }
+}
