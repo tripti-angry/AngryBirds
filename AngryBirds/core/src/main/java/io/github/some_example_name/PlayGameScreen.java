@@ -25,6 +25,9 @@ public class PlayGameScreen implements Screen {
     private Texture angryTexture;
     private Texture structTexture;
     private Texture scoreTexture;
+    private Texture greenButtonTexture;
+    private Texture redButtonTexture;
+
     private int level;
 
     // Constants for button size, padding, etc.
@@ -35,7 +38,7 @@ public class PlayGameScreen implements Screen {
 
     public PlayGameScreen(MainGame game, int level) {
         this.game = game;
-        this.level=level;
+        this.level = level;
 
         // Load textures
         loadTextures();
@@ -47,7 +50,7 @@ public class PlayGameScreen implements Screen {
     }
 
     private void loadTextures() {
-        backgroundTexture = new Texture(Gdx.files.internal("background.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("angry-birds/background.png"));
         pauseButtonTexture = new Texture(Gdx.files.internal("ui/pause-button.png"));
         replayButtonTexture = new Texture(Gdx.files.internal("ui/replay-button.png"));
         groundTexture = new Texture(Gdx.files.internal("angry-birds/ground.png"));
@@ -56,6 +59,8 @@ public class PlayGameScreen implements Screen {
         angryTexture = new Texture(Gdx.files.internal("angry-birds/angry.png"));
         structTexture = new Texture(Gdx.files.internal("ui/hello.png"));
         scoreTexture = new Texture(Gdx.files.internal("ui/score.png"));
+        greenButtonTexture = new Texture(Gdx.files.internal("ui/green.png"));
+        redButtonTexture = new Texture(Gdx.files.internal("ui/red.png"));
     }
 
     @Override
@@ -68,7 +73,7 @@ public class PlayGameScreen implements Screen {
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
 
-        // Handle input for pause button
+        // Handle input for pause, win, and lose buttons
         handleInput();
 
         // Draw the background and game elements
@@ -114,7 +119,25 @@ public class PlayGameScreen implements Screen {
         float structX = viewport.getWorldWidth() - structWidth;
         float structY = groundHeight - 80;
         game.batch.draw(structTexture, structX, structY, structWidth, structHeight);
+
+        // Update buttons: green button size stays the same, increase red button size
+        float greenButtonWidth = 64;
+        float greenButtonHeight = 64;
+
+        float redButtonWidth = 90;  // Increased red button width
+        float redButtonHeight = 90; // Increased red button height
+
+        float greenButtonX = viewport.getWorldWidth() - greenButtonWidth - PADDING;  // Right side, with padding
+        float greenButtonY = 20;  // Adjust the Y coordinate for the green button as needed
+
+        float redButtonX = viewport.getWorldWidth() - redButtonWidth - 2 * PADDING - greenButtonWidth;  // Left of the green button, with padding
+        float redButtonY = 5;  // Adjust the Y coordinate for the red button as needed
+
+        // Draw the buttons
+        game.batch.draw(greenButtonTexture, greenButtonX, greenButtonY, greenButtonWidth, greenButtonHeight);
+        game.batch.draw(redButtonTexture, redButtonX, redButtonY, redButtonWidth, redButtonHeight);
     }
+
 
     private void drawAngryBirds(float catapultX, float catapultY) {
         float angrySize = 64;
@@ -133,9 +156,21 @@ public class PlayGameScreen implements Screen {
 
             float pauseButtonX = 10;
             float pauseButtonY = viewport.getWorldHeight() - BUTTON_SIZE - PADDING;
+            float greenButtonX = viewport.getWorldWidth() - BUTTON_SIZE - PADDING;
+            float greenButtonY = PADDING;
+            float redButtonX = greenButtonX - BUTTON_SIZE - PADDING;
+            float redButtonY = greenButtonY;
 
+            // Check if the green button is clicked
+            if (isButtonTouched(touchPos, greenButtonX, greenButtonY, BUTTON_SIZE, BUTTON_SIZE)) {
+                game.setScreen(new WinScreen(game));  // Switch to the WinScreen
+            }
+            // Check if the red button is clicked
+            else if (isButtonTouched(touchPos, redButtonX, redButtonY, BUTTON_SIZE, BUTTON_SIZE)) {
+                game.setScreen(new LoseScreen(game));  // Switch to the LoseScreen
+            }
             // Check if the pause button is clicked
-            if (isButtonTouched(touchPos, pauseButtonX, pauseButtonY, BUTTON_SIZE, BUTTON_SIZE)) {
+            else if (isButtonTouched(touchPos, pauseButtonX, pauseButtonY, BUTTON_SIZE, BUTTON_SIZE)) {
                 game.setScreen(new PauseScreen(game));  // Switch to the PauseScreen
             }
         }
@@ -175,5 +210,7 @@ public class PlayGameScreen implements Screen {
         angryTexture.dispose();
         structTexture.dispose();
         scoreTexture.dispose();
+        greenButtonTexture.dispose();
+        redButtonTexture.dispose();
     }
 }
