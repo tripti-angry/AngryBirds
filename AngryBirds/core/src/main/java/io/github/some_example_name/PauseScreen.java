@@ -24,7 +24,7 @@ public class PauseScreen implements Screen {
     private Texture contTexture;
     private Stage stage;  //input handling
     private int level;
-    public PauseScreen(MainGame game) {
+    public PauseScreen(MainGame game, int level) {
         this.game = game;
         this.level=level;
 
