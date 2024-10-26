@@ -18,109 +18,86 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 public class MenuScreen implements Screen {
 
     private MainGame game;
-    private Texture backgroundTexture;
-    private OrthographicCamera camera;
+    private Texture bgTexture;
+    private OrthographicCamera cam;
     private Viewport viewport;
     private Stage stage;
-    private Texture settingsTexture; // Texture for settings button
+    private Texture settingsTexture;
 
     public MenuScreen(MainGame game) {
         this.game = game;
-
-        // Load the background image
-        backgroundTexture = new Texture(Gdx.files.internal("angry-birds/background.png"));
-
-        // Load the settings button image
+        bgTexture = new Texture(Gdx.files.internal("angry-birds/background.png"));
         settingsTexture = new Texture(Gdx.files.internal("ui/settings.png"));
-
-        // Create the camera and viewport
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(1920, 1080, camera);
-
-        // Initialize the stage for UI
+        cam = new OrthographicCamera();
+        viewport = new FitViewport(1920, 1080, cam);
         stage = new Stage(viewport);
-        Gdx.input.setInputProcessor(stage); // Set the stage as the input processor
+        Gdx.input.setInputProcessor(stage);
 
-        // Load the play button image
-        Texture playButtonTexture = new Texture(Gdx.files.internal("ui/play.png"));
-        TextureRegionDrawable playButtonDrawable = new TextureRegionDrawable(new TextureRegion(playButtonTexture));
 
-        // Create the ImageButton using the texture
-        ImageButton playButton = new ImageButton(playButtonDrawable);
-        playButton.addListener(new ClickListener() {
+        Texture playBtnTexture = new Texture(Gdx.files.internal("ui/play.png"));
+        TextureRegionDrawable playButtonDrawable = new TextureRegionDrawable(new TextureRegion(playBtnTexture));
+
+        ImageButton playBtn = new ImageButton(playButtonDrawable);
+        playBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScreen(game)); // Switch to the GameScreen
+                game.setScreen(new LevelSelectScreen(game));
             }
         });
 
-        // Load the exit button image
-        Texture exitButtonTexture = new Texture(Gdx.files.internal("ui/exit.png"));
-        TextureRegionDrawable exitButtonDrawable = new TextureRegionDrawable(new TextureRegion(exitButtonTexture));
+        Texture exitBtnTexture = new Texture(Gdx.files.internal("ui/exit.png"));
+        TextureRegionDrawable exitButtonDrawable = new TextureRegionDrawable(new TextureRegion(exitBtnTexture));
 
-        // Create the ImageButton using the texture for exit
-        ImageButton exitButton = new ImageButton(exitButtonDrawable);
-        exitButton.addListener(new ClickListener() {
+        ImageButton exitBtn = new ImageButton(exitButtonDrawable);
+        exitBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit(); // Exit the application
+                Gdx.app.exit();
             }
         });
 
-        // Create a table to arrange the buttons and center them
         Table table = new Table();
-        table.setFillParent(true); // Make the table fill the parent (stage)
+        table.setFillParent(true);
 
-        // Define the sizes of the buttons based on viewport
-        float buttonWidth = viewport.getWorldWidth() * 0.6f;  // 60% of the viewport width
-        float buttonHeight = viewport.getWorldHeight() * 0.3f; // 30% of the viewport height
+        float buttonWidth = viewport.getWorldWidth() * 0.6f;
+        float buttonHeight = viewport.getWorldHeight() * 0.3f;
 
-        // Add the play button with the defined size to the table
-        table.add(playButton).size(buttonWidth, buttonHeight).center().padBottom(20); // Center with bottom padding
+        table.add(playBtn).size(buttonWidth, buttonHeight).center().padBottom(20);
 
-        // Add the table to the stage
         stage.addActor(table);
 
-        // Create a new table for the exit button
         Table exitTable = new Table();
-        exitTable.top().right().padTop(20).padRight(20); // Position at top-right with padding
-        exitTable.setFillParent(true); // Fill the parent (stage)
+        exitTable.top().right().padTop(20).padRight(20);
+        exitTable.setFillParent(true);
 
-        // Add the exit button to the exit table
-        exitTable.add(exitButton).size(100, 100); // Define size for exit button
+        exitTable.add(exitBtn).size(100, 100);
 
-        // Add the exit table to the stage
         stage.addActor(exitTable);
 
-        // Add the settings button
-        ImageButton settingsButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(settingsTexture)));
-        settingsButton.setSize(100, 100);
-        settingsButton.setPosition(20, viewport.getWorldHeight() - 120); // Adjust position as needed
-        settingsButton.addListener(new ClickListener() {
+        ImageButton settingsBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(settingsTexture)));
+        settingsBtn.setSize(100, 100);
+        settingsBtn.setPosition(20, viewport.getWorldHeight() - 120);
+        settingsBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Define what happens when the settings button is clicked
+                // when settings button will be clicked
             }
         });
-        stage.addActor(settingsButton); // Add the settings button to the stage
+        stage.addActor(settingsBtn);
     }
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);  // Clear the screen
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Set the camera
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
+        cam.update();
+        game.batch.setProjectionMatrix(cam.combined);
 
-        // Start drawing the background
         game.batch.begin();
-        // Fill the entire viewport with the background texture
-        game.batch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        game.batch.draw(bgTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
 
-        // Draw the UI (stage with buttons)
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -149,7 +126,7 @@ public class MenuScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-        backgroundTexture.dispose();
-        settingsTexture.dispose(); // Dispose of settings texture
+        bgTexture.dispose();
+        settingsTexture.dispose();
     }
 }
