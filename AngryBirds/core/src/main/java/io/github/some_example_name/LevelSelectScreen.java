@@ -17,90 +17,71 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public class LevelSelectScreen implements Screen {
 
     private MainGame game;
-    private OrthographicCamera camera;
+    private OrthographicCamera cam;
     private Viewport viewport;
     private Stage stage;
-    private Texture backgroundTexture;
+    private Texture bgTexture;
 
     public LevelSelectScreen(MainGame game) {
         this.game = game;
 
-        // Load the background image (level selection screen)
-        backgroundTexture = new Texture(Gdx.files.internal("ui/levelpage.png"));  // Replace with actual file path
+        bgTexture = new Texture(Gdx.files.internal("ui/levelpage.png"));
 
-        // Create the camera and viewport
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(1920, 1080, camera);
+        cam = new OrthographicCamera();
+        viewport = new FitViewport(1920, 1080, cam);
 
-        // Initialize the stage for UI
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
-        // Add the level 1 button with adjusted size and position
-        addLevelButton(216, 720, 300, 300, 1);  // Adjust the x, y, width, height values as per your layout
-        // You can add other level buttons here similarly...
-
+        addLevelButton(216, 720, 300, 300, 1);
         addBackButton(-27, -22, 250, 250);
     }
 
     private void addLevelButton(float x, float y, float width, float height, final int level) {
-        // Load the texture for the button (e.g., level 1 button)
-        Texture buttonTexture = new Texture(Gdx.files.internal("ui/level1.png"));  // Replace with actual file path
 
-        // Create an ImageButton with the actual texture
-        ImageButton button = new ImageButton(new TextureRegionDrawable(new TextureRegion(buttonTexture)));
+        Texture btnTexture = new Texture(Gdx.files.internal("ui/level1.png"));
+        ImageButton button = new ImageButton(new TextureRegionDrawable(new TextureRegion(btnTexture)));
 
-        // Adjust the size and position based on your background layout
         button.setBounds(x, y, width, height);
 
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Switch to PlayGameScreen when level is clicked
-                game.setScreen(new PlayGameScreen(game, level));  // Pass the level number
+                game.setScreen(new PlayGameScreen(game, level));
             }
         });
 
-        // Add the button to the stage
         stage.addActor(button);
     }
 
     private void addBackButton(float x, float y, float width, float height) {
-        // Load the back button texture
-        Texture backButtonTexture = new Texture(Gdx.files.internal("ui/backbutton.png"));  // Replace with actual file path
+        Texture backBtnTexture = new Texture(Gdx.files.internal("ui/backbutton.png"));
 
-        // Create an ImageButton for the back button
-        ImageButton backButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(backButtonTexture)));
-        backButton.setBounds(x, y, width, height);
+        ImageButton backBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(backBtnTexture)));
+        backBtn.setBounds(x, y, width, height);
 
-        // Add a ClickListener to go back to the MenuScreen
-        backButton.addListener(new ClickListener() {
+        backBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                // Switch to MenuScreen when back button is clicked
-                game.setScreen(new MenuScreen(game));  // Replace MenuScreen with your actual menu screen class
+                game.setScreen(new MenuScreen(game));
             }
         });
 
-        // Add the back button to the stage
-        stage.addActor(backButton);
+        stage.addActor(backBtn);
     }
 
     @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);  // Clear the screen
+    public void render(float timeElapsed) {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Update camera
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
+        cam.update();
+        game.batch.setProjectionMatrix(cam.combined);
 
-        // Draw background
         game.batch.begin();
-        game.batch.draw(backgroundTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        game.batch.draw(bgTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
         game.batch.end();
 
-        // Draw UI elements (buttons)
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -129,6 +110,6 @@ public class LevelSelectScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-        backgroundTexture.dispose();
+        bgTexture.dispose();
     }
 }
