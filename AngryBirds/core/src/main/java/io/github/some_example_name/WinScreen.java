@@ -20,11 +20,9 @@ public class WinScreen implements Screen {
     private Stage stage;
     private Viewport viewport;
     private Texture loseTexture;
-
-    // Button textures
-    private Texture menuButtonTexture;
-    private Texture replayButtonTexture;
-    private Texture nextButtonTexture;
+    private Texture menuBtnTexture;
+    private Texture replayBtnTexture;
+    private Texture nextBtnTexture;
     private int level;
 
     public WinScreen(MainGame game) {
@@ -32,60 +30,54 @@ public class WinScreen implements Screen {
         viewport = new FitViewport(1920, 1080);
         stage = new Stage(viewport);
 
-        // Load "Level Failed" screen texture
         loseTexture = new Texture(Gdx.files.internal("ui/passlevel.png"));
 
-        Image loseImage = new Image(loseTexture);
-        loseImage.setSize(viewport.getWorldWidth(), viewport.getWorldHeight()); // Scale to fit screen
-        stage.addActor(loseImage);
+        Image loseImg = new Image(loseTexture);
+        loseImg.setSize(viewport.getWorldWidth(), viewport.getWorldHeight());
+        stage.addActor(loseImg);
 
-        // Load button textures
-        menuButtonTexture = new Texture(Gdx.files.internal("ui/menu.png"));
-        replayButtonTexture = new Texture(Gdx.files.internal("ui/replay.png"));
-        nextButtonTexture = new Texture(Gdx.files.internal("ui/next.png"));
+        menuBtnTexture = new Texture(Gdx.files.internal("ui/menu.png"));
+        replayBtnTexture = new Texture(Gdx.files.internal("ui/replay.png"));
+        nextBtnTexture = new Texture(Gdx.files.internal("ui/next.png"));
 
-        // Create buttons
-        ImageButton menuButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(menuButtonTexture)));
-        ImageButton replayButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(replayButtonTexture)));
-        ImageButton nextButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(nextButtonTexture)));
+        ImageButton menuBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(menuBtnTexture)));
+        ImageButton replayBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(replayBtnTexture)));
+        ImageButton nextBtn = new ImageButton(new TextureRegionDrawable(new TextureRegion(nextBtnTexture)));
 
-        // Set button properties using the new helper method
-        setButtonProperties(menuButton, 650, 150, 190, 180);
-        setButtonProperties(replayButton, 860, 130, 200, 200);
-        setButtonProperties(nextButton, 1085, 150, 190, 180);
+        setButtonProperties(menuBtn, 650, 150, 190, 180);
+        setButtonProperties(replayBtn, 860, 130, 200, 200);
+        setButtonProperties(nextBtn, 1085, 150, 190, 180);
 
-        // Add listeners to buttons
-        menuButton.addListener(new ClickListener() {
+        menuBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new MenuScreen(game)); // Navigate to MenuScreen
+                game.setScreen(new MenuScreen(game));
             }
         });
 
-        replayButton.addListener(new ClickListener() {
+        replayBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new PlayGameScreen(game, level)); // Restart level (navigate to PlayGameScreen)
+                game.setScreen(new PlayGameScreen(game, level));
             }
         });
 
-        nextButton.addListener(new ClickListener() {
+        nextBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new LevelSelectScreen(game)); // Navigate to SelectLevelScreen
+                game.setScreen(new LevelSelectScreen(game));
             }
         });
 
-        // Add buttons to stage
-        stage.addActor(menuButton);
-        stage.addActor(replayButton);
-        stage.addActor(nextButton);
 
-        // Set input processor
+        stage.addActor(menuBtn);
+        stage.addActor(replayBtn);
+        stage.addActor(nextBtn);
+
         Gdx.input.setInputProcessor(stage);
     }
 
-    // Helper method to set button position and size
+
     private void setButtonProperties(ImageButton button, float x, float y, float width, float height) {
         button.setSize(width, height);
         button.setPosition(x, y);
@@ -95,7 +87,6 @@ public class WinScreen implements Screen {
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Render the lose screen
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
     }
@@ -125,8 +116,8 @@ public class WinScreen implements Screen {
     public void dispose() {
         stage.dispose();
         loseTexture.dispose();
-        menuButtonTexture.dispose();
-        replayButtonTexture.dispose();
-        nextButtonTexture.dispose();
+        menuBtnTexture.dispose();
+        replayBtnTexture.dispose();
+        nextBtnTexture.dispose();
     }
 }
