@@ -356,6 +356,10 @@ public class PlayGameScreen implements Screen {
         greenBtnTexture.dispose();
         redBtnTexture.dispose();
         longStructTexture.dispose();
+        smallStructTexture.dispose();
+        glassStructTexture.dispose();
+        additionalLongStructTexture.dispose();
+        pigTexture.dispose();
     }
 }
 
