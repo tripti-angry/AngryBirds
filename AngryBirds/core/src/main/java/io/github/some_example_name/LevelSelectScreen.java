@@ -25,7 +25,7 @@ public class LevelSelectScreen implements Screen {
     public LevelSelectScreen(MainGame game) {
         this.game = game;
 
-        bgTexture = new Texture(Gdx.files.internal("ui/levelpage.png"));
+        bgTexture = new Texture(Gdx.files.internal("ui/lf.png.png"));
 
         cam = new OrthographicCamera();
         viewport = new FitViewport(1920, 1080, cam);
@@ -33,13 +33,17 @@ public class LevelSelectScreen implements Screen {
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
-        addLevelButton(216, 720, 300, 300, 1);
+        addLevelButton(110, 745, 300, 300, 1);
+        addLevelButton(450, 745, 300, 300, 2);
+        addLevelButton(820, 745, 300, 300, 3);
         addBackButton(-27, -22, 250, 250);
     }
 
-    private void addLevelButton(float x, float y, float width, float height, final int level) {
 
-        Texture btnTexture = new Texture(Gdx.files.internal("ui/level1.png"));
+    private void addLevelButton(float x, float y, float width, float height, final int level) {
+        // Select appropriate texture based on the level
+        String texturePath = "ui/level" + level + ".png";
+        Texture btnTexture = new Texture(Gdx.files.internal(texturePath));
         ImageButton button = new ImageButton(new TextureRegionDrawable(new TextureRegion(btnTexture)));
 
         button.setBounds(x, y, width, height);
@@ -47,7 +51,14 @@ public class LevelSelectScreen implements Screen {
         button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new PlayGameScreen(game, level));
+
+                if (level == 1) {
+                    game.setScreen(new PlayGameScreen1(game, level));
+                } else if (level == 2) {
+                    game.setScreen(new PlayGameScreen2(game, level));
+                } else if (level == 3) {
+                    game.setScreen(new PlayGameScreen3(game, level));
+                }
             }
         });
 
