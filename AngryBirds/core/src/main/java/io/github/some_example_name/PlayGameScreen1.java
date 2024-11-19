@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.Screen;
 
-
 public class PlayGameScreen1 implements Screen {
 
     private final MainGame game;
@@ -29,6 +28,9 @@ public class PlayGameScreen1 implements Screen {
 
     private Texture groundTexture; // Texture for the ground
     private Body groundBody; // Box2D body for the ground
+
+    // Add the Catapult instance
+    private Catapult catapult;
 
     public PlayGameScreen1(MainGame game, int level) {
         this.game = game;
@@ -56,8 +58,8 @@ public class PlayGameScreen1 implements Screen {
 
         // Initialize pigs
         pigs = new Array<>();
-        pigs.add(new LargePig(900, 300, world));
-        pigs.add(new SmallPig(1000, 300, world));
+//        pigs.add(new LargePig(900, 300, world));
+//        pigs.add(new SmallPig(1000, 300, world));
 
         // Initialize structures
         structures = new Array<>();
@@ -72,6 +74,9 @@ public class PlayGameScreen1 implements Screen {
 
         // Create the ground physical body
         createGround();
+
+        // Initialize the catapult
+        catapult = new Catapult(350, 42, world); // Set the catapult position and the Box2D world
     }
 
     private void createGround() {
@@ -111,7 +116,7 @@ public class PlayGameScreen1 implements Screen {
         world.step(1 / 60f, 6, 2);
 
         // Handle input (for launching birds)
-        handleInput();
+//        handleInput();
 
         // Draw game entities
         game.batch.begin();
@@ -127,6 +132,10 @@ public class PlayGameScreen1 implements Screen {
         game.batch.draw(new Texture("angry-birds/background.png"), 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
 
         game.batch.draw(groundTexture, 0, 0, viewport.getWorldWidth(), 200); // Draw at the bottom, height is 100 pixels
+
+
+        // Draw catapult
+        catapult.render(game.batch);
 
         // Draw birds
         for (Bird bird : birds) {
@@ -144,39 +153,25 @@ public class PlayGameScreen1 implements Screen {
         }
     }
 
-    private void handleInput() {
-        if (Gdx.input.isTouched()) {
-            // Get the touch position
-            float touchX = Gdx.input.getX();
-            float touchY = Gdx.input.getY();
-
-            // Get the position of the bird (where the bird should be launched from)
-            Vector2 birdPosition = currentBird.getPosition();
-
-            // Calculate the distance between the bird's position and the touch position
-            float deltaX = touchX - birdPosition.x ;
-            float deltaY = touchY - birdPosition.y;
-
-            // Scale the force based on the touch distance (control how strong the launch is)
-            float forceX = deltaX * 0.5f;  // Horizontal force
-            float forceY = deltaY * 0.5f;  // Vertical force, you can adjust this scale factor
-
-            // Apply a maximum vertical force to prevent going too high
-            forceY = Math.min(forceY, 1000f);  // Limit the vertical force
-
-            // Apply the calculated force
-            Vector2 force = new Vector2(forceX, forceY);
-            currentBird.launch(force);
-
-            // Optionally reset the bird after launch
-            currentBird = null; // Reset after launch
-        }
-    }
-
-    private Vector2 calculateLaunchForce() {
-        // This method now calculates the launch force dynamically based on touch input
-        return new Vector2(1000, 1000); // This method is redundant in this version
-    }
+//    private void handleInput() {
+//        if (Gdx.input.isTouched()) {
+//            // Get the touch position
+//            float touchX = Gdx.input.getX();
+//            float touchY = Gdx.input.getY();
+////
+////            // If a bird is selected, aim and pull back
+////            if (currentBird != null) {
+////                catapult.aim(touchX - currentBird.getPosition().x); // Adjust the angle
+//////                catapult.pullBack(touchY); // Pull back for launch power
+////            }
+////        }
+//
+//        if (Gdx.input.justTouched() && currentBird != null) {
+//            // Release the bird when touch is released
+//            catapult.release();
+//            currentBird = null; // Reset the bird after launch
+//        }
+//    }
 
     @Override
     public void resize(int width, int height) {
