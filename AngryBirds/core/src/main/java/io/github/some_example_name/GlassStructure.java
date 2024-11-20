@@ -23,9 +23,25 @@ public class GlassStructure extends Structure {
 
         // Adjust size based on shape type
         if (shapeType.equalsIgnoreCase("rectangle")) {
-            this.width = 10;  // Reduce width
-            this.height = 20; // Reduce height
+            this.width = 400;  // Reduce width
+            this.height = 50; // Reduce height
         }
+
+        if (shapeType.equalsIgnoreCase("thick-rectangle-block")) {
+            this.width = 80;  // Reduce width
+            this.height = 70; // Reduce height
+        }
+
+        if (shapeType.equalsIgnoreCase("square")) {
+            this.width = 270;  // Reduce width
+            this.height = 90; // Reduce height
+        }
+
+        if (shapeType.equalsIgnoreCase("vertical-rectangle")) {
+            this.width = 20;  // Reduce width
+            this.height = 100; // Reduce height
+        }
+
 
         // Create the Box2D body for the structure
         createPhysicsBody(x, y, world);
@@ -41,6 +57,10 @@ public class GlassStructure extends Structure {
             case "triangle":
                 return "angry-birds/glass_triangle.png";
             case "rectangle":
+                return "angry-birds/glass_rectangle.png";
+            case "thick-rectangle-block":
+                return "angry-birds/glass_rectangle.png";
+            case "vertical-rectangle":
                 return "angry-birds/glass_rectangle.png";
             default:
                 return "angry-birds/glass_structure.png";
