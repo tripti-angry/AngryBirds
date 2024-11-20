@@ -1,338 +1,232 @@
-
 package io.github.some_example_name;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-
-
+import com.badlogic.gdx.Screen;
 
 public class PlayGameScreen2 implements Screen {
 
-    private MainGame game;
-    private OrthographicCamera cam;
-    private Viewport viewport;
+    private final MainGame game;
+    private final OrthographicCamera camera;
+    private final Viewport viewport;
+    private World world; // Box2D world for physics
+    private Box2DDebugRenderer debugRenderer; // For visualizing physics (optional)
 
-    private Texture bgTexture;
-    private Texture pauseBtnTexture;
-    private Texture replayBtnTexture;
-    private Texture groundTexture;
-    private Texture slingShotTexture;
-    private Texture birdTexture;
-    private Texture redbirdTexture;
-    private Texture scoreTexture;
-    private Texture greenBtnTexture;
-    private Texture redBtnTexture;
-    private Texture longStructTexture;
-    private Texture smallStructTexture;
-    private TextureRegion smallStructRegion;
-    private TextureRegion longStructRegion;
-    private Texture glassStructTexture;
-    private Texture additionalLongStructTexture;
-    private TextureRegion additionalLongStructRegion;
-    private Texture pigTexture;
+    private Array<Bird> birds; // Birds to launch
+    private Array<Pig> pigs; // Pigs to destroy
+    private Array<Structure> structures; // Game structures
+    private int level; // Current level
 
+    private Bird currentBird; // The bird being launched
 
-    private int level;
+    private Texture groundTexture; // Texture for the ground
+    private Body groundBody; // Box2D body for the ground
 
-    private static final float BUTTON_SIZE = 64;
-    private static final float PADDING = 10;
-    private static final float SCORE_WIDTH = 300;
-    private static final float SCORE_HEIGHT = 100;
+    // Add the Catapult instance
+    private Catapult catapult;
 
-    public PlayGameScreen2(MainGame game, int level) {
+    public  PlayGameScreen2(MainGame game, int level) {
         this.game = game;
         this.level = level;
+        this.camera = new OrthographicCamera();
+        this.viewport = new FitViewport(1920, 1080, camera);
+        camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
 
-        loadTextures();
+        // Initialize Box2D world (gravity)
+        world = new World(new Vector2(0, -100f), true);
 
-        cam = new OrthographicCamera();
-        viewport = new FitViewport(1920, 1080, cam);
-        cam.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
+        // Debug renderer to visualize physics (optional)
+        debugRenderer = new Box2DDebugRenderer();
+
+        // Initialize game elements
+        initializeGameElements();
     }
 
-    private void loadTextures() {
-        bgTexture = new Texture(Gdx.files.internal("angry-birds/background.png"));
-        pauseBtnTexture = new Texture(Gdx.files.internal("ui/pause-button.png"));
-        replayBtnTexture = new Texture(Gdx.files.internal("ui/replay-button.png"));
-        groundTexture = new Texture(Gdx.files.internal("angry-birds/ground.png"));
-        slingShotTexture = new Texture(Gdx.files.internal("ui/slingshot2.png"));
-        birdTexture = new Texture(Gdx.files.internal("angry-birds/angry.png"));
-        redbirdTexture = new Texture(Gdx.files.internal("angry-birds/angry.png"));
-        scoreTexture = new Texture(Gdx.files.internal("ui/score.png"));
-        greenBtnTexture = new Texture(Gdx.files.internal("ui/green.png"));
-        redBtnTexture = new Texture(Gdx.files.internal("ui/red.png"));
-        longStructTexture = new Texture(Gdx.files.internal("ui/long-wooden-struct.png"));
-        smallStructTexture = new Texture(Gdx.files.internal("ui/small-wooden-struct.png"));
-        glassStructTexture = new Texture(Gdx.files.internal("ui/glass-struct.png"));
-        additionalLongStructTexture = new Texture(Gdx.files.internal("ui/long-wooden-struct.png"));
-        pigTexture = new Texture(Gdx.files.internal("ui/pig-struct.png"));
+    private void initializeGameElements() {
+        // Initialize birds
+        birds = new Array<>();
+        birds.add(new RedBird(400, 300, world));
+        birds.add(new RedBird(300, 300, world));
+        birds.add(new RedBird(200, 300, world));
 
-        additionalLongStructRegion = new TextureRegion(additionalLongStructTexture);
-        smallStructRegion = new TextureRegion(smallStructTexture);
-        longStructRegion = new TextureRegion(longStructTexture);
+        // Initialize pigs
+        pigs = new Array<>();
+        pigs.add(new LargePig(1550, 195, world));
+        pigs.add(new SmallPig(1710, 340, world));
+        pigs.add(new SmallPig(1432, 340, world));
 
+
+        // Initialize structures
+        structures = new Array<>();
+        structures.add(new SteelStructure(1500,170,100,"rectangle",world) );
+        structures.add(new SteelStructure(1435,170,100,"rectangle",world) );
+
+        structures.add(new SteelStructure(1700,170,100,"rectangle",world) );
+        structures.add(new SteelStructure(1765,170,100,"rectangle",world) );
+
+        structures.add(new SteelStructure(1455,290,100,"vertical-rectangle",world) );
+        structures.add(new SteelStructure(1730,290,100,"vertical-rectangle",world) );
+
+
+        structures.add(new GlassStructure(1455, 440, 100, "thick-rectangle-block", world));
+        structures.add(new GlassStructure(1730, 440, 100, "thick-rectangle-block", world));
+
+        structures.add(new GlassStructure(1455, 490, 100, "vertical-rectangle", world));
+        structures.add(new GlassStructure(1730, 490, 100, "vertical-rectangle", world));
+
+        structures.add(new WoodenStructure(1440, 207, 100, "rectangle", world) );
+        structures.add(new WoodenStructure(1495, 207, 100, "rectangle-verysmall", world) );
+
+        structures.add(new WoodenStructure(1710, 207, 100, "rectangle", world) );
+        structures.add(new WoodenStructure(1765, 207, 100, "rectangle-verysmall", world) );
+
+        structures.add(new WoodenStructure(1593, 195, 100, "rectangle-kindalong", world) );
+
+        structures.add(new WoodenStructure(1477, 240, 100, "rectangle", world) );
+        structures.add(new WoodenStructure(1425, 240, 100, "rectangle-verysmall", world) );
+
+        structures.add(new WoodenStructure(1750, 240, 100, "rectangle", world) );
+        structures.add(new WoodenStructure(1700, 240, 100, "rectangle-verysmall", world) );
+
+        structures.add(new WoodenStructure(1700, 290, 100, "vertical-rectangle", world) );
+        structures.add(new WoodenStructure(1765, 290, 100, "vertical-rectangle", world) );
+        structures.add(new WoodenStructure(1490, 290, 100, "vertical-rectangle", world) );
+        structures.add(new WoodenStructure(1425, 290, 100, "vertical-rectangle", world) );
+
+        structures.add(new WoodenStructure(1455, 335, 100, "horizontal-rectangle-kindasmall", world) );
+        structures.add(new WoodenStructure(1730, 335, 100, "horizontal-rectangle-kindasmall", world) );
+
+        structures.add(new WoodenStructure(1685, 372, 100, "vertical-rectangle", world) );
+        structures.add(new WoodenStructure(1410, 372, 100, "vertical-rectangle", world) );
+        structures.add(new WoodenStructure(1780, 372, 100, "vertical-rectangle", world) );
+        structures.add(new WoodenStructure(1495, 372, 100, "vertical-rectangle", world) );
+
+        structures.add(new WoodenStructure(1455, 416, 100, "horizontal-rectangle-kindasmall", world) );
+        structures.add(new WoodenStructure(1730, 416, 100, "horizontal-rectangle-kindasmall", world) );
+
+
+        // Initialize ground texture
+        groundTexture = new Texture("angry-birds/ground.png");
+
+        // Create the ground physical body
+        createGround();
+
+        // Initialize the catapult
+        catapult = new Catapult(350, 42, world); // Set the catapult position and the Box2D world
+    }
+
+    private void createGround() {
+        // Create the ground body as a static Box2D body at the bottom of the screen
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.StaticBody; // Static body for the ground
+        bodyDef.position.set(viewport.getWorldWidth() / 2, 110); // Position it at the bottom of the screen
+
+        groundBody = world.createBody(bodyDef);
+
+        // Create the ground shape (a rectangle)
+        PolygonShape groundShape = new PolygonShape();
+        groundShape.setAsBox(viewport.getWorldWidth() / 2, 50); // Width is half of the viewport width, height is 50 pixels
+
+        // Create the fixture for the ground body
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = groundShape;
+        fixtureDef.friction = 0.5f; // Add friction to the ground
+
+        // Attach the fixture to the body
+        groundBody.createFixture(fixtureDef);
+
+        // Dispose of shape after use
+        groundShape.dispose();
     }
 
     @Override
-    public void render(float timeElapsed) {
+    public void render(float delta) {
+        // Clear the screen
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        cam.update();
-        game.batch.setProjectionMatrix(cam.combined);
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
 
+        // Step the physics world
+        world.step(1 / 60f, 6, 2);
+
+        // Handle input (for launching birds)
         handleInput();
 
+        // Sort structures by their Y position (lowest Y will be drawn first)
+        structures.sort((a, b) -> Float.compare(a.getY(), b.getY())); // Sort structures by Y position
+
+        // Draw game entities
         game.batch.begin();
         drawGameElements();
         game.batch.end();
+
+//         Optionally render Box2D debug information
+//         debugRenderer.render(world, camera.combined);
     }
 
     private void drawGameElements() {
-        game.batch.draw(bgTexture, 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        // Draw background
+        game.batch.draw(new Texture("angry-birds/background.png"), 0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
 
-        float pauseBtnX = 10;
-        float pauseBtnY = viewport.getWorldHeight() - BUTTON_SIZE - PADDING;
-        game.batch.draw(pauseBtnTexture, pauseBtnX, pauseBtnY, BUTTON_SIZE, BUTTON_SIZE);
-        game.batch.draw(replayBtnTexture, pauseBtnX + BUTTON_SIZE + PADDING, pauseBtnY, BUTTON_SIZE, BUTTON_SIZE);
-
-        float scoreX = viewport.getWorldWidth() - SCORE_WIDTH - PADDING;
-        float scoreY = viewport.getWorldHeight() - SCORE_HEIGHT - PADDING;
-        game.batch.draw(scoreTexture, scoreX, scoreY, SCORE_WIDTH, SCORE_HEIGHT);
-
-        float groundHeight = viewport.getWorldHeight() * 0.3f;
-        game.batch.draw(groundTexture, 0, 0, viewport.getWorldWidth(), groundHeight);
-
-        float catapultX = 300;
-        float catapultHeight = 150;
-        float catapultY = groundHeight - 80;
-        game.batch.draw(slingShotTexture, catapultX, catapultY, 150, catapultHeight);
-
-        float birdWidth = 50;
-        float birdHeight = 50;
-        float birdX = catapultX + 50;
-        float birdY = catapultY + catapultHeight - birdHeight / 2;
-        game.batch.draw(birdTexture, birdX, birdY, birdWidth, birdHeight);
-
-        drawAngryBirds(catapultX, catapultY);
+        game.batch.draw(groundTexture, 0, 0, viewport.getWorldWidth(), 200); // Draw at the bottom, height is 100 pixels
 
 
-        float longStructWidth = 500;
-        float longStructHeight = 30;
-        float longStructX = viewport.getWorldWidth() - longStructWidth - 200;
-        float longStructY = catapultY;
-        game.batch.draw(longStructRegion, longStructX, longStructY, longStructWidth, longStructHeight);
+        // Draw catapult
+        catapult.render(game.batch);
 
-        float additionalLongStructWidth = 300;
-        float additionalLongStructHeight = 30;
+        // Draw birds
+        for (Bird bird : birds) {
+            bird.render(game.batch);
+        }
 
-        float leftAdditionalLongStructX = longStructX - additionalLongStructWidth + 130;
-        float leftAdditionalLongStructY = longStructY + (longStructHeight - additionalLongStructHeight) / 2 +288;
-        game.batch.draw(additionalLongStructRegion, leftAdditionalLongStructX, leftAdditionalLongStructY, additionalLongStructWidth, additionalLongStructHeight, additionalLongStructWidth, additionalLongStructHeight, 1, 1, 90f);
+        // Draw pigs
+        for (Pig pig : pigs) {
+            pig.render(game.batch);
+        }
 
-        float rightAdditionalLongStructX = longStructX - additionalLongStructWidth + 326;
-        float rightAdditionalLongStructY = longStructY + (longStructHeight - additionalLongStructHeight) / 2 + 288;
-        game.batch.draw(additionalLongStructRegion, rightAdditionalLongStructX, rightAdditionalLongStructY, additionalLongStructWidth, additionalLongStructHeight, additionalLongStructWidth, additionalLongStructHeight, 1, 1, 90f);
-
-
-        additionalLongStructWidth = 220;
-        additionalLongStructHeight = 30;
-
-        leftAdditionalLongStructX = longStructX - additionalLongStructWidth + 170;
-        leftAdditionalLongStructY = longStructY + (longStructHeight - additionalLongStructHeight) / 2 +490;
-        game.batch.draw(additionalLongStructRegion, leftAdditionalLongStructX, leftAdditionalLongStructY, additionalLongStructWidth, additionalLongStructHeight, additionalLongStructWidth, additionalLongStructHeight, 1, 1, 90f);
-
-
-        rightAdditionalLongStructX = longStructX - additionalLongStructWidth + 290;
-        rightAdditionalLongStructY = longStructY + (longStructHeight - additionalLongStructHeight) / 2 + 490;
-        game.batch.draw(additionalLongStructRegion, rightAdditionalLongStructX, rightAdditionalLongStructY, additionalLongStructWidth, additionalLongStructHeight, additionalLongStructWidth, additionalLongStructHeight, 1, 1, 90f);
-
-
-        float smallStructWidth = 35;
-        float smallStructHeight = 120;
-
-        float centerSmallStructX = longStructX + (longStructWidth - smallStructWidth) / 2;
-        float centerSmallStructY = longStructY + longStructHeight + 131;
-
-        float increasedHeight = smallStructHeight * 2.3f;
-        float increasedWidth = smallStructWidth * 0.7f;
-
-        game.batch.draw(smallStructRegion, centerSmallStructX, centerSmallStructY,
-            increasedWidth/2, increasedHeight/ 2,
-            increasedWidth, increasedHeight,
-            1, 1, 90);
-
-        smallStructWidth = 30;
-        smallStructHeight = 55;
-        centerSmallStructX = longStructX + (longStructWidth - smallStructWidth) / 2;
-        centerSmallStructY = longStructY + longStructHeight + 221;
-
-        increasedHeight = smallStructHeight * 2.3f;
-        increasedWidth = smallStructWidth * 0.7f;
-
-        game.batch.draw(smallStructRegion, centerSmallStructX, centerSmallStructY,
-            increasedWidth/2, increasedHeight/ 2,
-            increasedWidth, increasedHeight,
-            1, 1, 90);
-
-
-        smallStructWidth = 30;
-        smallStructHeight = 65;
-        centerSmallStructX = longStructX + (longStructWidth - smallStructWidth) / 2;
-        centerSmallStructY = longStructY + longStructHeight + 400;
-
-        increasedHeight = smallStructHeight * 2.3f;
-        increasedWidth = smallStructWidth * 0.7f;
-
-        game.batch.draw(smallStructRegion, centerSmallStructX, centerSmallStructY,
-            increasedWidth/2, increasedHeight/ 2,
-            increasedWidth, increasedHeight,
-            1, 1, 90);
-
-
-        smallStructWidth = 30;
-        smallStructHeight = 25;
-        centerSmallStructX = longStructX + (longStructWidth - smallStructWidth) / 2;
-        centerSmallStructY = longStructY + longStructHeight + 475;
-
-        increasedHeight = smallStructHeight * 2.3f;
-        increasedWidth = smallStructWidth * 0.7f;
-
-        game.batch.draw(smallStructRegion, centerSmallStructX, centerSmallStructY,
-            increasedWidth/2, increasedHeight/ 2,
-            increasedWidth, increasedHeight,
-            1, 1, 0);
-
-
-        smallStructWidth = 30;
-        smallStructHeight = 70;
-
-        float leftSmallStructX = longStructX + (longStructWidth - smallStructWidth) / 2 - smallStructWidth - 200;
-        float leftSmallStructY = longStructY + longStructHeight- 12;
-
-        game.batch.draw(smallStructRegion, leftSmallStructX, leftSmallStructY, smallStructWidth / 2, smallStructHeight / 2,
-            smallStructWidth, smallStructHeight, 1, 1, 180);
-
-
-        float rightSmallStructX = longStructX + (longStructWidth - smallStructWidth) / 2 + 190;
-        float rightSmallStructY = leftSmallStructY;
-
-
-        game.batch.draw(smallStructRegion, rightSmallStructX, rightSmallStructY, smallStructWidth / 2, smallStructHeight / 2,
-            smallStructWidth, smallStructHeight, 1, 1, 180);
-
-        centerSmallStructX = longStructX + (longStructWidth - smallStructWidth) / 2;
-        centerSmallStructY = longStructY + longStructHeight - 74;
-
-        increasedHeight = smallStructHeight * 2.3f;
-        increasedWidth = smallStructWidth * 0.7f;
-
-        game.batch.draw(smallStructRegion, centerSmallStructX, centerSmallStructY,
-            increasedWidth/2, increasedHeight/ 2,
-            increasedWidth, increasedHeight,
-            1, 1, 90);
-
-
-        float glassWidth = 25;
-        float glassHeight = 120;
-
-        float leftGlassX = centerSmallStructX - (glassWidth + 30);
-        float leftGlassY = centerSmallStructY + increasedHeight / 2-10;
-        game.batch.draw(glassStructTexture, leftGlassX, leftGlassY, glassWidth, glassHeight);
-
-        float rightGlassX = centerSmallStructX + increasedWidth + 25;
-        float rightGlassY = leftGlassY;
-        game.batch.draw(glassStructTexture, rightGlassX, rightGlassY, glassWidth, glassHeight);
-
-
-        float centerSmallStructXHigher = longStructX + (longStructWidth - smallStructWidth) / 2;
-        float centerSmallStructYHigher= longStructY + longStructHeight - 74 + 50;
-
-        float increasedHeight2 = smallStructHeight * 2.3f;
-        float increasedWidth2 = smallStructWidth * 0.7f;
-
-        game.batch.draw(smallStructRegion, centerSmallStructXHigher, centerSmallStructYHigher,
-            increasedWidth2 / 2 - 20 , increasedHeight2 / 2 + 20,
-            increasedWidth2, increasedHeight2,
-            1, 1, 90);
-
-
-        float pigWidth = 70;
-        float pigHeight = 70;
-
-        float pigX = centerSmallStructXHigher + (increasedWidth2 - pigWidth) / 2;
-        float pigY = centerSmallStructYHigher + increasedHeight2 - pigHeight / 2 + 187;
-
-        game.batch.draw(pigTexture, pigX, pigY, pigWidth, pigHeight);
-
-        float greenBtnWidth = 64;
-        float greenBtnHeight = 64;
-
-        float redBtnWidth = 90;
-        float redBtnHeight = 90;
-
-        float greenBtnX = viewport.getWorldWidth() - greenBtnWidth - PADDING;
-        float greenBtnY = 20;
-
-        float redBtnX = viewport.getWorldWidth() - redBtnWidth - 2 * PADDING - greenBtnWidth;
-        float redBtnY = 5;
-
-        game.batch.draw(greenBtnTexture, greenBtnX, greenBtnY, greenBtnWidth, greenBtnHeight);
-        game.batch.draw(redBtnTexture, redBtnX, redBtnY, redBtnWidth, redBtnHeight);
-    }
-
-    private void drawAngryBirds(float catapultX, float catapultY) {
-        float redbirdSize = 64;
-        float redbirdPadding = 20;
-        for (int i = 0; i < 3; i++) {
-            float redbirdX = catapultX - (redbirdSize + redbirdPadding) * (i + 1);
-            float redbirdY = catapultY;
-            game.batch.draw(redbirdTexture, redbirdX, redbirdY, redbirdSize, redbirdSize);
+        // Draw structures
+        for (Structure structure : structures) {
+            structure.render(game.batch);
         }
     }
-
     private void handleInput() {
-        if (Gdx.input.isTouched()) {
-            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            cam.unproject(touchPos);
+        if (Gdx.input.justTouched()) {
+            // Convert screen coordinates to world coordinates
+            Vector2 touchPosition = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
 
-            float pauseBtnX = 10;
-            float pauseBtnY = viewport.getWorldHeight() - BUTTON_SIZE - PADDING;
-            float greenBtnX = viewport.getWorldWidth() - BUTTON_SIZE - PADDING;
-            float greenBtnY = PADDING;
-            float redBtnX = greenBtnX - BUTTON_SIZE - PADDING;
-            float redBtnY = greenBtnY;
-
-            if (isButtonTouched(touchPos, greenBtnX, greenBtnY, BUTTON_SIZE, BUTTON_SIZE)) {
-                game.setScreen(new WinScreen(game));
-            } else if (isButtonTouched(touchPos, redBtnX, redBtnY, BUTTON_SIZE, BUTTON_SIZE)) {
-                game.setScreen(new LoseScreen(game));
-            } else if (isButtonTouched(touchPos, pauseBtnX, pauseBtnY, BUTTON_SIZE, BUTTON_SIZE)) {
-                game.setScreen(new PauseScreen(game));
+            for (Bird bird : birds) {
+                // Check if the touch is within the bird's bounding box
+                if (bird.isTouched(touchPosition)) {
+                    // Place the bird on the catapult
+                    currentBird = bird;
+                    bird.setPosition(catapult.getX(), catapult.getY());
+                    break; // Stop checking other birds
+                }
             }
         }
     }
 
-    private boolean isButtonTouched(Vector3 touchPos, float btnX, float btnY, float btnWidth, float btnHeight) {
-        return touchPos.x > btnX && touchPos.x < btnX + btnWidth &&
-            touchPos.y > btnY && touchPos.y < btnY + btnHeight;
-    }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
-        cam.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
+        camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
     }
 
     @Override
-    public void show() {}
+    public void show() {
+        // Choose the first bird as the current bird to be launched
+        currentBird = birds.first();
+    }
 
     @Override
     public void hide() {}
@@ -345,26 +239,21 @@ public class PlayGameScreen2 implements Screen {
 
     @Override
     public void dispose() {
-        bgTexture.dispose();
-        pauseBtnTexture.dispose();
-        replayBtnTexture.dispose();
+        // Dispose resources
+        world.dispose();
+        debugRenderer.dispose();
+
+        for (Bird bird : birds) {
+            bird.dispose();
+        }
+        for (Pig pig : pigs) {
+            pig.dispose();
+        }
+        for (Structure structure : structures) {
+            structure.dispose();
+        }
+
+        // Dispose the ground texture
         groundTexture.dispose();
-        slingShotTexture.dispose();
-        birdTexture.dispose();
-        redbirdTexture.dispose();
-        scoreTexture.dispose();
-        greenBtnTexture.dispose();
-        redBtnTexture.dispose();
-        longStructTexture.dispose();
-        smallStructTexture.dispose();
-        glassStructTexture.dispose();
-        additionalLongStructTexture.dispose();
-        pigTexture.dispose();
     }
 }
-
-
-
-
-
-
