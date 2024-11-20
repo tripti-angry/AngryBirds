@@ -11,6 +11,18 @@ public class SteelStructure extends Structure {
         super(new TextureRegion(new Texture(getTextureForShape(shapeType))), x, y, health);
         this.width = 60; // Default width for steel structures
         this.height = 60; // Default height for steel structures
+
+        // Adjust size based on shape type
+        if (shapeType.equalsIgnoreCase("rectangle")) {
+            this.width = 70;  // Reduce width
+            this.height = 70; // Reduce height
+        }
+
+        if (shapeType.equalsIgnoreCase("vertical-rectangle")) {
+            this.width = 30;  // Reduce width
+            this.height = 130; // Reduce height
+        }
+
     }
 
     // A helper method to get the texture based on the shape type
@@ -22,6 +34,8 @@ public class SteelStructure extends Structure {
             case "triangle":
                 return "angry-birds/steel-triangle.png";
             case "rectangle":
+                return "angry-birds/steel-rectangle.png";
+            case "vertical-rectangle":
                 return "angry-birds/steel-rectangle.png";
             default:
                 return "angry-birds/steel_structure.png";
