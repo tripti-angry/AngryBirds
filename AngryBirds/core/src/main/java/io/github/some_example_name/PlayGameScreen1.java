@@ -65,9 +65,6 @@ public class PlayGameScreen1 implements Screen {
         structures = new Array<>();
         structures.add(new GlassStructure(1500, 165, 100, "rectangle", world));
 
-        WoodenStructure woodenStructure = new WoodenStructure(1500, 200, 100, "rectangle", world);
-        woodenStructure.rotate(45);  // Rotating the wooden block by 45 degrees
-        structures.add(woodenStructure);
 
         // Initialize ground texture
         groundTexture = new Texture("angry-birds/ground.png");
