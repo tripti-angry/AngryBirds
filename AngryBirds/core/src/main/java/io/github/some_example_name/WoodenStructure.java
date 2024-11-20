@@ -1,118 +1,141 @@
-package io.github.some_example_name;
 
+package io.github.some_example_name;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.math.MathUtils;
 
 
 public class WoodenStructure extends Structure {
-    protected Body body; // Physics body for Box2D
-    private float width;
-    private float height;
+    protected Body body;
+    private float width;  // Width of the glass structure
+    private float height; // Height of the glass structure
+    private float scale = -10f; // Scaling factor for the structure's size
 
     public WoodenStructure(float x, float y, int health, String shapeType, World world) {
-        // Call super first, passing the textureRegion, x, y, and health
+        // Initialize the glass structure with a texture based on the shape type
         super(new TextureRegion(new Texture(getTextureForShape(shapeType))), x, y, health);
 
-        // Now that super is called, you can initialize the rest
-        this.width = 50; // Default width
-        this.height = 50; // Default height
+        // Set initial size based on shape type or custom scaling
+        this.width = 100;  // Default width
+        this.height = 10;  // Default height
 
-        // Adjust dimensions for specific shape types
+        // Adjust size based on shape type
         if (shapeType.equalsIgnoreCase("rectangle")) {
-            this.width = 100; // Example dimensions for a rectangle
-            this.height = 20;
+            this.width = 75;  // Reduce width
+            this.height = 70; // Reduce height
         }
+
+        if (shapeType.equalsIgnoreCase("horizontal-rectangle-kindasmall")) {
+            this.width = 130;  // Reduce width
+            this.height = 20; // Reduce height
+        }
+
+        if (shapeType.equalsIgnoreCase("rectangle-kindalong")) {
+            this.width = 175;  // Reduce width
+            this.height = 35; // Reduce height
+        }
+        if (shapeType.equalsIgnoreCase("rectangle-verysmall")) {
+            this.width = 40;  // Reduce width
+            this.height = 70; // Reduce height
+        }
+
+        if (shapeType.equalsIgnoreCase("vertical-rectangle")) {
+            this.width = 30;  // Reduce width
+            this.height = 80; // Reduce height
+        }
+
 
         // Create the Box2D body for the structure
         createPhysicsBody(x, y, world);
     }
 
-
-
+    // A helper method to get the texture based on the shape type
     private static String getTextureForShape(String shapeType) {
         switch (shapeType.toLowerCase()) {
+
             case "square":
                 return "angry-birds/wooden_square.png";
             case "triangle":
                 return "angry-birds/wooden_triangle.png";
             case "rectangle":
                 return "angry-birds/wooden_rectangle.png";
+            case "horizontal-rectangle-kindasmall":
+                return "angry-birds/wooden_rectangle.png";
+            case "vertical-rectangle":
+                return "angry-birds/wooden_vertical_rectangle.png";
+            case "rectangle-kindalong":
+                return "angry-birds/wooden_rectangle.png";
+            case "rectangle-verysmall":
+                return "angry-birds/wooden_rectangle.png";
+
             default:
                 return "angry-birds/wooden_structure.png";
         }
     }
 
+    public void setRotation(float degrees) {
+        // Box2D rotation is in radians, so convert degrees to radians
+        body.setTransform(body.getPosition(), MathUtils.degreesToRadians * degrees);
+    }
+
     private void createPhysicsBody(float x, float y, World world) {
-        // Define the body type and position
+        // Box2D body definition for the structure
         BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.StaticBody; // Static body since it's a structure
-        bodyDef.position.set(x, y);
+        bodyDef.type = BodyDef.BodyType.StaticBody; // Static body for a structure that doesn't move
+        bodyDef.position.set(x, y); // Position at the specified location
 
         // Create the Box2D body
         body = world.createBody(bodyDef);
 
-        // Define the shape of the structure
+        // Create the shape for the glass structure
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(width / 2, height / 2);
+        shape.setAsBox(width / 2, height / 2); // Half of the width and height for Box2D
 
-        // Create a fixture for the body
+        // Define the fixture for the body (collision properties)
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 0.5f;  // Wood density
-        fixtureDef.friction = 0.4f;
-        fixtureDef.restitution = 0.2f; // Wood-like bounce
+        fixtureDef.density = 1f;  // Glass-like density
+        fixtureDef.friction = 0.3f;
+        fixtureDef.restitution = 0.2f;  // Low restitution for glass-like behavior
 
+        // Attach the fixture to the body
         body.createFixture(fixtureDef);
 
-        // Dispose of the shape after it's no longer needed
+        // Dispose of the shape after use to free memory
         shape.dispose();
     }
 
 
-    public void rotate(float angleDegrees) {
-        float angleRadians = (float) Math.toRadians(angleDegrees);
-        body.setTransform(body.getPosition(), angleRadians);
+
+    @Override
+    public void update() {
+        if (isDestroyed()) {
+            System.out.println("Wooden structure shattered!");
+            // Additional destruction effects (e.g., particles, sound) can be added here
+        }
     }
 
     @Override
-    public void render(SpriteBatch batch) {
-        if (batch != null && texture != null) {
-            Vector2 position = body.getPosition();
-            float angle = (float) Math.toDegrees(body.getAngle()); // Convert angle to degrees
-
-            // Draw the texture using rotation
-            batch.draw(
-                texture,
-                position.x - width / 2, position.y - height / 2, // Bottom-left corner
-                width / 2, height / 2, // Origin for rotation
-                width, height, // Dimensions of the texture
-                1, 1 // Scale
-                // Rotation angle
-            );
-        }
+    public void dispose() {
+        super.dispose(); // Dispose of resources (texture, etc.)
     }
 
     @Override
     public void takeDamage(int damage) {
-        this.health -= damage;
-        System.out.println("Wooden structure takes " + damage + " damage!");
-        if (this.health <= 0) {
-            destroy();
-        }
+        // Glass structures are fragile, receiving double damage
+        int fragileDamage = damage * 2;
+        super.takeDamage(fragileDamage);
     }
 
     @Override
-    public void update() {
-        if (this.health <= 0) {
-            destroy();
-        }
+    public void render(SpriteBatch batch) {
+        Vector2 position = body.getPosition();
+        // Assuming you have logic to render the texture properly
+        batch.draw(texture, position.x - width / 2, position.y - height / 2, width, height);
     }
 
-    private void destroy() {
-        System.out.println("Wooden structure is destroyed!");
-        // Logic to remove this structure from the world, if necessary
-    }
 }
+
