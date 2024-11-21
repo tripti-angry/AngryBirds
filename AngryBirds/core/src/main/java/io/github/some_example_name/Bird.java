@@ -11,77 +11,170 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 
 public abstract class Bird {
 
-    protected Body body;  // Box2D body for physics interactions
-    protected float x, y; // Position of the bird
-    protected String texturePath;
-    protected int damage; // Damage value for the bird
-    protected Texture texture; // Texture for rendering
+    protected Body body;            // Box2D body for physics interactions
+    protected String texturePath;   // Path to the bird's texture file
+    protected int damage;           // Damage value for the bird
+    protected Texture texture;      // Texture for rendering the bird
+    private Vector2 position;       // Logical position of the bird
+    private World world;            // The Box2D world the bird belongs to
 
+    /**
+     * Constructor to initialize the bird.
+     *
+     * @param texturePath Path to the bird's texture file.
+     * @param x Initial x-position.
+     * @param y Initial y-position.
+     * @param width Bird's width (used for physics shape).
+     * @param height Bird's height (used for physics shape).
+     * @param damage Damage value of the bird.
+     * @param world The Box2D world where the bird exists.
+     */
     public Bird(String texturePath, float x, float y, int width, int height, int damage, World world) {
         this.texturePath = texturePath;
-        this.x = x;
-        this.y = y;
         this.damage = damage;
+        this.position = new Vector2(x, y);
+        this.world = world;
 
         // Load the texture
         this.texture = new Texture(texturePath);
 
-        // Initialize the Box2D body and other components
-        createBody(x, y, width, height, world);
+        // Initialize the Box2D body
+        createBody(x, y, width, height);
     }
 
-    private void createBody(float x, float y, int width, int height, World world) {
-        // Body definition for physics interactions
+    /**
+     * Creates the Box2D body for the bird.
+     *
+     * @param x Initial x-position.
+     * @param y Initial y-position.
+     * @param width Bird's width (used for physics shape).
+     * @param height Bird's height (used for physics shape).
+     */
+    private void createBody(float x, float y, int width, int height) {
         BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(x, y); // Set position to the bird's starting position
+        bodyDef.type = BodyDef.BodyType.DynamicBody;  // Dynamic body for physics
+        bodyDef.position.set(x, y);                  // Set initial position
 
-        // Create the body in the Box2D world
-        body = world.createBody(bodyDef);
+        body = world.createBody(bodyDef);            // Create the body in the world
 
-        // Create the shape of the bird (using a circle for simplicity)
+        // Use a circle shape for simplicity
         CircleShape shape = new CircleShape();
-        shape.setRadius(width / 2); // Set radius to half of width
+        shape.setRadius(width / 2f); // Use half the width as the radius
 
-        // Define the fixture for collision detection
+        // Define the fixture for the body
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 1.0f; // Standard density for physics objects
-        fixtureDef.friction = 0.5f; // Some friction
-        fixtureDef.restitution = 0.5f; // Some restitution (bounciness)
+        fixtureDef.density = 1.0f;      // Standard density for the bird
+        fixtureDef.friction = 0.5f;     // Some friction for realistic interactions
+        fixtureDef.restitution = 0.5f;  // Some restitution (bounciness)
 
-        // Attach the shape (fixture) to the body
+        // Attach the shape to the body
         body.createFixture(fixtureDef);
 
-        // Dispose of shape after use (since it's no longer needed after being attached to the body)
+        // Dispose of the shape to free memory
         shape.dispose();
     }
-    public Vector2 getPosition() {
-        return body.getPosition(); // Return the position of the bird's physics body
-    }
 
-    // This method will be overridden in the subclasses
+    /**
+     * Abstract method for launching the bird.
+     * Subclasses should define their specific launch behavior.
+     *
+     * @param force Vector representing the launch force.
+     */
     public abstract void launch(Vector2 force);
 
-    // The render method that can be overridden by subclasses
+    /**
+     * Updates the bird's logic. Can be overridden by subclasses.
+     *
+     * @param deltaTime Time since the last update.
+     */
+    public void update(float deltaTime) {
+        // Example: Update logic like animations or status
+    }
+
+    /**
+     * Renders the bird on the screen.
+     *
+     * @param batch SpriteBatch used for drawing.
+     */
     public void render(SpriteBatch batch) {
         if (texture != null) {
-            // Update position based on Box2D body, and render the bird at that position
-            Vector2 bodyPosition = body.getPosition();
-            batch.draw(texture, bodyPosition.x - texture.getWidth() / 2, bodyPosition.y - texture.getHeight() / 2);
+            Vector2 bodyPosition = body.getPosition(); // Get position from Box2D body
+            batch.draw(texture,
+                bodyPosition.x - texture.getWidth() / 2f,
+                bodyPosition.y - texture.getHeight() / 2f);
         }
     }
 
-    // The update method that can be overridden by subclasses
-    public void update(float deltaTime) {
-        // Logic to update bird (e.g., checking for conditions, animation)
-        // This can be overridden by subclasses to add more specific behaviors
+    public Body getBody() {
+        return body;
     }
 
+
+
+    /**
+     * Returns the bird's current position.
+     *
+     * @return A Vector2 containing the bird's position.
+     */
+    public Vector2 getPosition() {
+        return body.getPosition();
+    }
+
+    /**
+     * Returns the bird's X-coordinate.
+     *
+     * @return X-coordinate of the bird.
+     */
+    public float getX() {
+        return body.getPosition().x;
+    }
+
+    /**
+     * Returns the bird's Y-coordinate.
+     *
+     * @return Y-coordinate of the bird.
+     */
+    public float getY() {
+        return body.getPosition().y;
+    }
+
+    /**
+     * Sets the bird's position.
+     *
+     * @param x New X-coordinate.
+     * @param y New Y-coordinate.
+     */
+    public void setPosition(float x, float y) {
+        position.set(x, y); // Update logical position
+        if (body != null) {
+            body.setTransform(x, y, body.getAngle()); // Update Box2D body position
+        }
+    }
+
+    /**
+     * Checks if the bird is touched at a given position.
+     *
+     * @param touchPosition Position of the touch input.
+     * @return True if the bird is touched, false otherwise.
+     */
+    public boolean isTouched(Vector2 touchPosition) {
+        float birdWidth = texture.getWidth();
+        float birdHeight = texture.getHeight();
+        return touchPosition.x >= getX() - birdWidth / 2 &&
+            touchPosition.x <= getX() + birdWidth / 2 &&
+            touchPosition.y >= getY() - birdHeight / 2 &&
+            touchPosition.y <= getY() + birdHeight / 2;
+    }
+
+    /**
+     * Disposes of resources used by the bird.
+     */
     public void dispose() {
-        // Clean up resources (dispose of textures, etc.)
         if (texture != null) {
             texture.dispose();
         }
     }
+
+
 }
