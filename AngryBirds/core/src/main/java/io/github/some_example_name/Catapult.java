@@ -16,6 +16,7 @@ public class Catapult {
     private World world;
     private Body armBody, baseBody;
     private Projectile currentProjectile;
+    private float height;
 
     public Catapult(float x, float y, World world) {
         this.x = x;
@@ -31,6 +32,19 @@ public class Catapult {
 
     private void createPhysicsBodies() {
         // Define and create physics bodies for the catapult arm and base (e.g., static and dynamic bodies)
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+
+    public float getHeight() {
+        return height;
     }
 
     public void render(SpriteBatch batch) {
@@ -62,6 +76,7 @@ public class Catapult {
     public void aim(float newAngle) {
         this.angle = newAngle;
     }
+
 
     public void pullBack(float newPower) {
         this.power = newPower;
