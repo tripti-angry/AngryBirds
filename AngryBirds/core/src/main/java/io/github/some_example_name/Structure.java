@@ -54,6 +54,11 @@ public abstract class Structure {
         }
     }
 
+    public float getY() {
+        return y;  // Simply return the Y position for structures
+    }
+
+
     // Abstract method for update, to be implemented by subclasses with specific behavior
     public abstract void update();
 
