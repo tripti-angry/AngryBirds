@@ -16,7 +16,7 @@ public class WoodenStructure extends Structure {
 
     public WoodenStructure(float x, float y, int health, String shapeType, World world) {
         // Initialize the glass structure with a texture based on the shape type
-        super(new TextureRegion(new Texture(getTextureForShape(shapeType))), x, y, health);
+        super(new TextureRegion(new Texture(getTextureForShape(shapeType))), x, y, health,world);
 
         // Set initial size based on shape type or custom scaling
         this.width = 100;  // Default width
