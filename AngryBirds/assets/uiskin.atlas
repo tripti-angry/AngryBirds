@@ -196,3 +196,19 @@ white
   orig: 1, 1
   offset: 0, 0
   index: -1
+progress_bar_bg
+  rotate: false
+  xy: 0, 0
+  size: 400, 50
+  orig: 400, 50
+  offset: 0, 0
+  index: -1
+progress_bar_fill
+  rotate: false
+  xy: 0, 50
+  size: 400, 50
+  orig: 400, 50
+  offset: 0, 0
+  index: -1
+
+
