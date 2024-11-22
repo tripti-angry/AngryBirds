@@ -10,8 +10,8 @@ public class MediumPig extends Pig {
             new Texture(Gdx.files.internal("angry-birds/medium_pig.png")), // Texture
             x,                                                            // X position
             y,                                                            // Y position
-            50,                                                           // Width
-            50,                                                           // Height
+            55,                                                           // Width
+            55,                                                           // Height
             20                                                            // Health
         );
     }
