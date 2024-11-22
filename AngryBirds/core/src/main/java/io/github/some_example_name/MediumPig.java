@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 
 public class MediumPig extends Pig {
 
-    public MediumPig(float x, float y) {
+    public MediumPig(float x, float y, World world) {
         super(
             new Texture(Gdx.files.internal("angry-birds/medium_pig.png")), // Texture
             x,                                                            // X position
