@@ -8,7 +8,7 @@ public class SteelStructure extends Structure {
 
     public SteelStructure(float x, float y, int health, String shapeType, World world) {
         // Initialize the steel structure with a specific texture based on shape type
-        super(new TextureRegion(new Texture(getTextureForShape(shapeType))), x, y, health);
+        super(new TextureRegion(new Texture(getTextureForShape(shapeType))), x, y, health,world);
         this.width = 60; // Default width for steel structures
         this.height = 60; // Default height for steel structures
 
