@@ -96,9 +96,6 @@ public class PlayGameScreen3 implements Screen {
 
 
 
-
-
-
         structures.add(new GlassStructure(1538, 430, 100, "small-square-block", world));
         structures.add(new GlassStructure(1566, 430, 100, "small-square-block", world));
         structures.add(new GlassStructure(1595, 430, 100, "small-square-block", world));
@@ -116,18 +113,6 @@ public class PlayGameScreen3 implements Screen {
 
 
 
-
-//      structures.add(new GlassStructure(1730, 440, 100, "thick-rectangle-block", world));
-//
-//        structures.add(new GlassStructure(1455, 490, 100, "vertical-rectangle", world));
-//        structures.add(new GlassStructure(1730, 490, 100, "vertical-rectangle", world));
-//
-//        structures.add(new WoodenStructure(1440, 207, 100, "rectangle", world) );
-//        structures.add(new WoodenStructure(1495, 207, 100, "rectangle-verysmall", world) );
-//
-//        structures.add(new WoodenStructure(1710, 207, 100, "rectangle", world) );
-//        structures.add(new WoodenStructure(1765, 207, 100, "rectangle-verysmall", world) );
-
         structures.add(new WoodenStructure(1597, 300, 100, "rectangle-kindalong", world) );
         structures.add(new WoodenStructure(1430, 300, 100, "rectangle-kindalong", world) );
         structures.add(new WoodenStructure(1485, 320, 100, "rectangle-kindalong", world) );
@@ -144,30 +129,6 @@ public class PlayGameScreen3 implements Screen {
 
 
 
-
-//
-//        structures.add(new WoodenStructure(1477, 240, 100, "rectangle", world) );
-//        structures.add(new WoodenStructure(1425, 240, 100, "rectangle-verysmall", world) );
-//
-//        structures.add(new WoodenStructure(1750, 240, 100, "rectangle", world) );
-//        structures.add(new WoodenStructure(1700, 240, 100, "rectangle-verysmall", world) );
-//
-//        structures.add(new WoodenStructure(1700, 290, 100, "vertical-rectangle", world) );
-//        structures.add(new WoodenStructure(1765, 290, 100, "vertical-rectangle", world) );
-//        structures.add(new WoodenStructure(1490, 290, 100, "vertical-rectangle", world) );
-//        structures.add(new WoodenStructure(1425, 290, 100, "vertical-rectangle", world) );
-//
-//        structures.add(new WoodenStructure(1455, 335, 100, "horizontal-rectangle-kindasmall", world) );
-//        structures.add(new WoodenStructure(1730, 335, 100, "horizontal-rectangle-kindasmall", world) );
-//
-//        structures.add(new WoodenStructure(1685, 372, 100, "vertical-rectangle", world) );
-//        structures.add(new WoodenStructure(1410, 372, 100, "vertical-rectangle", world) );
-//        structures.add(new WoodenStructure(1780, 372, 100, "vertical-rectangle", world) );
-//        structures.add(new WoodenStructure(1495, 372, 100, "vertical-rectangle", world) );
-//
-//        structures.add(new WoodenStructure(1455, 416, 100, "horizontal-rectangle-kindasmall", world) );
-//        structures.add(new WoodenStructure(1730, 416, 100, "horizontal-rectangle-kindasmall", world) );
-//
 
         // Initialize ground texture
         groundTexture = new Texture("angry-birds/ground.png");
