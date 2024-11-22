@@ -2,6 +2,7 @@ package io.github.some_example_name;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 
 public abstract class Pig {
     protected Texture texture;
@@ -25,6 +26,10 @@ public abstract class Pig {
         if (health <= 0) {
             onDestroyed();
         }
+    }
+
+    public Vector2 getPosition() {
+        return new Vector2(x, y);
     }
 
     // Abstract method for destruction behavior (to be implemented in subclasses)
