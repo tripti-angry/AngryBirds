@@ -1,16 +1,28 @@
 package io.github.some_example_name;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.badlogic.gdx.Screen;
-
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.Input;
 
 public class PlayGameScreen3 implements Screen {
 
@@ -23,20 +35,27 @@ public class PlayGameScreen3 implements Screen {
     private Array<Bird> birds; // Birds to launch
     private Array<Pig> pigs; // Pigs to destroy
     private Array<Structure> structures; // Game structures
-    private CatapultController catapultController;
-
     private int level; // Current level
 
     private Bird currentBird; // The bird being launched
 
     private Texture groundTexture; // Texture for the ground
-    private Body groundBody; // Box2D body for the ground
     private Texture angryTexture;
+    private Body groundBody; // Box2D body for the ground
 
     // Add the Catapult instance
     private Catapult catapult;
 
-    public  PlayGameScreen3(MainGame game, int level) {
+    // Buttons
+    private TextButton replayButton;
+    private TextButton pauseButton;
+    private Stage stage; // For UI buttons
+
+    private Skin skin; // UI Skin
+    private Label scoreLabel;
+    private int score;
+
+    public PlayGameScreen3(MainGame game, int level) {
         this.game = game;
         this.level = level;
         this.camera = new OrthographicCamera();
@@ -45,17 +64,48 @@ public class PlayGameScreen3 implements Screen {
 
         // Initialize Box2D world (gravity)
         world = new World(new Vector2(0, -100f), true);
-        catapultController = new CatapultController(catapult);
-
 
         // Debug renderer to visualize physics (optional)
         debugRenderer = new Box2DDebugRenderer();
 
         // Initialize game elements
         initializeGameElements();
+
+        score=0;
+
+        // Initialize stage for UI elements
+        stage = new Stage(viewport, game.batch);
+        Gdx.input.setInputProcessor(stage);
+
+        // Initialize the skin (UI assets)
+        skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+        // Initialize buttons
+        initializeButtons();
+
+        // Create score label
+        scoreLabel = new Label("Score: 0", skin);
+        scoreLabel.setPosition(viewport.getWorldWidth() - 200, viewport.getWorldHeight() - 50);
+
+        // Create score button
+        TextButton scoreButton = new TextButton("Score: " + score, skin);
+        scoreButton.setPosition(viewport.getWorldWidth() - 200, viewport.getWorldHeight() - 100);
+        scoreButton.setSize(100, 50);
+
+        // Add listener to the button (optional action)
+        scoreButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                // Optional: any specific action on button press
+            }
+        });
+
+        // Add button and label to the stage
+        stage.addActor(scoreLabel);
+        stage.addActor(scoreButton);
     }
 
-    private void initializeGameElements() {
+        private void initializeGameElements() {
 
         angryTexture = new Texture("angry-birds/angry.png");
         // Initialize birds
@@ -140,6 +190,7 @@ public class PlayGameScreen3 implements Screen {
         catapult = new Catapult(350, 42, world); // Set the catapult position and the Box2D world
     }
 
+
     private void createGround() {
         // Create the ground body as a static Box2D body at the bottom of the screen
         BodyDef bodyDef = new BodyDef();
@@ -164,6 +215,43 @@ public class PlayGameScreen3 implements Screen {
         groundShape.dispose();
     }
 
+    private void initializeButtons() {
+        // Replay button
+        replayButton = new TextButton("Replay", skin);
+        replayButton.setPosition(50, viewport.getWorldHeight() - 100); // Set position in the top-left corner
+        replayButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                restartLevel();
+            }
+        });
+
+        // Pause button
+        pauseButton = new TextButton("Pause", skin);
+        pauseButton.setPosition(100, viewport.getWorldHeight() - 150); // Set position below the replay button in the top-left corner
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                pauseGame();
+            }
+        });
+
+        // Add buttons to the stage
+        stage.addActor(replayButton);
+        stage.addActor(pauseButton);
+    }
+
+
+    private void restartLevel() {
+        // Restart the level by reinitializing the game elements
+        initializeGameElements();
+    }
+
+    private void pauseGame() {
+        // Switch to the Pause Screen (assuming you have a PauseScreen implemented)
+        game.setScreen(new PauseScreen(game));
+    }
+
     @Override
     public void render(float delta) {
         // Clear the screen
@@ -176,19 +264,21 @@ public class PlayGameScreen3 implements Screen {
         // Step the physics world
         world.step(1 / 60f, 6, 2);
 
-        // Handle input (for launching birds)
-        handleInput();
-
-        // Sort structures by their Y position (lowest Y will be drawn first)
-        structures.sort((a, b) -> Float.compare(a.getY(), b.getY())); // Sort structures by Y position
+        checkBirdCollisions(currentBird);
 
         // Draw game entities
         game.batch.begin();
         drawGameElements();
         game.batch.end();
 
-//         Optionally render Box2D debug information
-//         debugRenderer.render(world, camera.combined);
+        scoreLabel.setText("Score: " + score);
+
+        // Draw buttons
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+
+        // Optionally render Box2D debug information
+//        debugRenderer.render(world, camera.combined);
     }
 
     private void drawGameElements() {
@@ -197,16 +287,8 @@ public class PlayGameScreen3 implements Screen {
 
         game.batch.draw(groundTexture, 0, 0, viewport.getWorldWidth(), 200); // Draw at the bottom, height is 100 pixels
 
-
         // Draw catapult
         catapult.render(game.batch);
-
-        if (currentBird != null) {
-            // If the current bird is selected, position it correctly on the catapult
-            game.batch.draw(angryTexture,
-                currentBird.getX() - angryTexture.getWidth() / 2,
-                currentBird.getY() - angryTexture.getHeight() / 2);
-        }
 
         // Draw birds
         for (Bird bird : birds) {
@@ -224,43 +306,33 @@ public class PlayGameScreen3 implements Screen {
         }
     }
 
-    private void handleInput() {
-        if (Gdx.input.isTouched()) {
-            Vector2 touchPos = viewport.unproject(new Vector2(Gdx.input.getX(), Gdx.input.getY()));
-
-            if (currentBird != null) {
-                currentBird.setPosition(touchPos.x, touchPos.y);
-            } else {
-                for (Bird bird : birds) {
-                    if (bird.isTouched(touchPos)) {
-                        currentBird = bird;
-                        birds.removeValue(bird, true);
-                        currentBird.getBody().setType(BodyDef.BodyType.KinematicBody);
-                        break;
-                    }
-                }
+    private void checkBirdCollisions(Bird bird) {
+        // Check for collisions between the bird and structures
+        for (Structure structure : structures) {
+            if (bird.getBody().getFixtureList().get(0).testPoint(structure.getPosition())) {
+                // Increment the score when a bird hits a structure
+                score += 10; // Or modify the points as needed
             }
-        } else if (currentBird != null) {
-            Vector2 launchForce = new Vector2(catapult.getX(), catapult.getY()).sub(currentBird.getPosition()).scl(10);
-            currentBird.getBody().setType(BodyDef.BodyType.DynamicBody);
-            currentBird.launch(launchForce);
-            currentBird = null;
+        }
+
+        // Check for collisions with pigs
+        for (Pig pig : pigs) {
+            if (bird.getBody().getFixtureList().get(0).testPoint(pig.getPosition())) {
+                // Increment score when a bird hits a pig
+                score += 50; // Or modify the points as needed
+            }
         }
     }
-
 
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
-        camera.position.set(viewport.getWorldWidth() / 2, viewport.getWorldHeight() / 2, 0);
     }
-
     @Override
     public void show() {
         // Choose the first bird as the current bird to be launched
         currentBird = birds.first();
-
     }
 
     @Override
@@ -274,11 +346,23 @@ public class PlayGameScreen3 implements Screen {
 
     @Override
     public void dispose() {
+        // Dispose resources
         world.dispose();
         debugRenderer.dispose();
+
+        for (Bird bird : birds) {
+            bird.dispose();
+        }
+        for (Pig pig : pigs) {
+            pig.dispose();
+        }
+        for (Structure structure : structures) {
+            structure.dispose();
+        }
+
+        // Dispose the ground texture
         groundTexture.dispose();
-        for (Bird bird : birds) bird.dispose();
-        for (Pig pig : pigs) pig.dispose();
-        for (Structure structure : structures) structure.dispose();
     }
 }
+
+
