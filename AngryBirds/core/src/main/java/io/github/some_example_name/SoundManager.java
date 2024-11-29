@@ -6,7 +6,7 @@ import com.badlogic.gdx.Gdx;
 public class SoundManager {
 
     private static Sound backgroundMusic;
-    private static boolean isSoundOn = true; // Global sound state
+    private static boolean isSoundOn = true; 
 
     static {
         backgroundMusic = Gdx.audio.newSound(Gdx.files.internal("sounds/song.mp3"));
@@ -14,12 +14,12 @@ public class SoundManager {
 
     public static void playMusic() {
         if (isSoundOn) {
-            backgroundMusic.loop(); // Loop the music if sound is on
+            backgroundMusic.loop(); 
         }
     }
 
     public static void stopMusic() {
-        backgroundMusic.stop(); // Stop music
+        backgroundMusic.stop(); 
     }
 
     public static void toggleSound() {
