@@ -10,41 +10,41 @@ import com.badlogic.gdx.math.MathUtils;
 
 public class WoodenStructure extends Structure {
     protected Body body;
-    private float width;  // Width of the glass structure
-    private float height; // Height of the glass structure
-    private float scale = -10f; // Scaling factor for the structure's size
+    private float width;  
+    private float height; 
+    private float scale = -10f; 
 
     public WoodenStructure(float x, float y, int health, String shapeType, World world) {
-        // Initialize the glass structure with a texture based on the shape type
+     
         super(new TextureRegion(new Texture(getTextureForShape(shapeType))), x, y, health,world);
 
-        // Set initial size based on shape type or custom scaling
-        this.width = 100;  // Default width
-        this.height = 10;  // Default height
+       
+        this.width = 100;  
+        this.height = 10;  
 
-        // Adjust size based on shape type
+       
         if (shapeType.equalsIgnoreCase("rectangle")) {
-            this.width = 75;  // Reduce width
-            this.height = 70; // Reduce height
+            this.width = 75;  
+            this.height = 70; 
         }
 
         if (shapeType.equalsIgnoreCase("horizontal-rectangle-kindasmall")) {
-            this.width = 130;  // Reduce width
-            this.height = 20; // Reduce height
+            this.width = 130; 
+            this.height = 20; 
         }
 
         if (shapeType.equalsIgnoreCase("rectangle-kindalong")) {
-            this.width = 175;  // Reduce width
-            this.height = 35; // Reduce height
+            this.width = 175;  
+            this.height = 35;
         }
         if (shapeType.equalsIgnoreCase("rectangle-verysmall")) {
-            this.width = 40;  // Reduce width
-            this.height = 70; // Reduce height
+            this.width = 40;  
+            this.height = 70; 
         }
 
         if (shapeType.equalsIgnoreCase("vertical-rectangle")) {
-            this.width = 30;  // Reduce width
-            this.height = 80; // Reduce height
+            this.width = 30; 
+            this.height = 80; 
         }
 
 
@@ -77,34 +77,34 @@ public class WoodenStructure extends Structure {
     }
 
     public void setRotation(float degrees) {
-        // Box2D rotation is in radians, so convert degrees to radians
+        
         body.setTransform(body.getPosition(), MathUtils.degreesToRadians * degrees);
     }
 
     private void createPhysicsBody(float x, float y, World world) {
-        // Box2D body definition for the structure
+        
         BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.StaticBody; // Static body for a structure that doesn't move
-        bodyDef.position.set(x, y); // Position at the specified location
+        bodyDef.type = BodyDef.BodyType.StaticBody; 
+        bodyDef.position.set(x, y); 
 
-        // Create the Box2D body
+      
         body = world.createBody(bodyDef);
 
-        // Create the shape for the glass structure
+      
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(width / 2, height / 2); // Half of the width and height for Box2D
+        shape.setAsBox(width / 2, height / 2); 
 
-        // Define the fixture for the body (collision properties)
+      
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 1f;  // Glass-like density
+        fixtureDef.density = 1f;  
         fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0.2f;  // Low restitution for glass-like behavior
+        fixtureDef.restitution = 0.2f; 
 
-        // Attach the fixture to the body
+      
         body.createFixture(fixtureDef);
 
-        // Dispose of the shape after use to free memory
+       
         shape.dispose();
     }
 
@@ -114,18 +114,18 @@ public class WoodenStructure extends Structure {
     public void update() {
         if (isDestroyed()) {
             System.out.println("Wooden structure shattered!");
-            // Additional destruction effects (e.g., particles, sound) can be added here
+           
         }
     }
 
     @Override
     public void dispose() {
-        super.dispose(); // Dispose of resources (texture, etc.)
+        super.dispose(); 
     }
 
     @Override
     public void takeDamage(int damage) {
-        // Glass structures are fragile, receiving double damage
+       
         int fragileDamage = damage * 2;
         super.takeDamage(fragileDamage);
     }
@@ -133,7 +133,7 @@ public class WoodenStructure extends Structure {
     @Override
     public void render(SpriteBatch batch) {
         Vector2 position = body.getPosition();
-        // Assuming you have logic to render the texture properly
+        
         batch.draw(texture, position.x - width / 2, position.y - height / 2, width, height);
     }
 
