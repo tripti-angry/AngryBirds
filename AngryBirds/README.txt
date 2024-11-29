@@ -1,3 +1,18 @@
+IN our Angry Birds game, we have implemented HomeScreen, MenuScreen which consists of setting and play icon.Setting icon consist
+of notifaction on/off, sound on/off, save/load game options which are from ui skin. Then we have implement 3 levels on level screen whivh
+consists of three types of birds(red,black,blue) which extends bird class, three types of pigs(small,medium,large) which extends pig class and
+three types of structures(wooden,steel,glass) which extends structure class. For the launching of bird, we have made a projectile class andc catapult class to handle the trajectory.
+We have win/lose screen which appears when the user win or looses the game.
+
+Screens like HomeScreen, PlayGameScreen, WinScreen, LoseScreen, and SettingsScreen inherit from the Screen class, which is provided by libGDX which covers inheritance.
+game.setScreen() method can switch between different screen types like HomeScreen, PlayGameScreen, and SettingsScreen as all these classes implement the Screen interface and this can conclude as polymorphism.
+Screen interface is used to define methods like show(), render(), resize(), etc which can be used by other classes as well.
+Inheritance is also defined when three types of birds,pigs,structure,levels extends bird,pig,structure,level class respectively.
+
+For serialization, we have used savedata and savemanager classes and for Junittesting we have made tests for bird and structure classes.
+
+
+
 # AngryBirds
 
 ## Overview
