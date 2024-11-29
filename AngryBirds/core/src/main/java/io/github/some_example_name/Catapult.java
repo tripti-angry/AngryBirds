@@ -11,7 +11,7 @@ public class Catapult {
     private float angle;
     private float power;
     private Texture catapultTexture;
-    private TextureRegion catapultTextureRegion; // TextureRegion for drawing
+    private TextureRegion catapultTextureRegion; 
     private SpriteBatch batch;
     private World world;
     private Body armBody, baseBody;
@@ -25,13 +25,13 @@ public class Catapult {
         this.angle = 0f;
         this.power = 0f;
 
-        catapultTexture = new Texture("ui/sshot.png"); // Placeholder texture
-        catapultTextureRegion = new TextureRegion(catapultTexture); // Create TextureRegion
+        catapultTexture = new Texture("ui/sshot.png"); 
+        catapultTextureRegion = new TextureRegion(catapultTexture); 
         createPhysicsBodies();
     }
 
     private void createPhysicsBodies() {
-        // Define and create physics bodies for the catapult arm and base (e.g., static and dynamic bodies)
+       
     }
 
     public float getX() {
@@ -48,26 +48,24 @@ public class Catapult {
     }
 
     public void render(SpriteBatch batch) {
-        // Define scaling factor
-        float scale = 0.4f;  // Scale factor for the catapult texture
+       
+        float scale = 0.4f;  
 
-        // Get the scaled width and height
         float scaledWidth = catapultTextureRegion.getRegionWidth() * scale;
         float scaledHeight = catapultTextureRegion.getRegionHeight() * scale;
 
-        // Draw the catapult texture at the appropriate position with scaling
+     
         batch.draw(catapultTextureRegion, x, y, catapultTextureRegion.getRegionWidth() / 3f, catapultTextureRegion.getRegionHeight() / 3f,
             catapultTextureRegion.getRegionWidth(), catapultTextureRegion.getRegionHeight(), scale, scale, angle);
 
-        // Optionally, draw the projectile (if there is one being launched)
+    
         if (currentProjectile != null) {
             currentProjectile.render(batch);
         }
     }
 
     public void update() {
-        // Update the position of the catapult, including power and angle
-        // Update projectile position if being launched
+       
         if (currentProjectile != null) {
             currentProjectile.update();
         }
@@ -83,14 +81,14 @@ public class Catapult {
     }
 
     public void release() {
-        // Launch the projectile with the current power and angle
+        
         if (currentProjectile != null) {
             currentProjectile.launch(power, angle);
         }
     }
 
     public void resetProjectile() {
-        // Reset the projectile to the catapult
+
         if (currentProjectile != null) {
             currentProjectile.resetPosition(x, y);
         }
@@ -101,7 +99,7 @@ public class Catapult {
     }
 
     public void dispose() {
-        // Dispose textures and other resources
+
         if (catapultTexture != null) {
             catapultTexture.dispose();
         }
