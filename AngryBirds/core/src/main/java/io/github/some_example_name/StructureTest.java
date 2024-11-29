@@ -14,13 +14,13 @@ public class StructureTest {
 
     @Before
     public void setUp() {
-        // Set up the world and the structure before each test
-        world = new World(new Vector2(0, -9.8f), true);  // Create a gravity-affected world
+        
+        world = new World(new Vector2(0, -9.8f), true);  
         TextureRegion textureRegion = new TextureRegion(new Texture("default_texture.png"));
         structure = new Structure(textureRegion, 10, 10, 100, world) {
             @Override
             public void update() {
-                // Dummy update method for abstract class
+               
             }
         };
     }
@@ -43,41 +43,41 @@ public class StructureTest {
 
     @Test
     public void testDestroyStructure() {
-        structure.applyDamage(100); // Apply enough damage to destroy the structure
+        structure.applyDamage(100); 
         assertTrue("Structure should be destroyed after taking 100 damage", structure.isDestroyed());
 
-        // Check that the Box2D body is destroyed from the world
+       
         assertNull("Box2D body should be destroyed", structure.getBody());
     }
 
     @Test
     public void testDispose() {
-        structure.dispose(); // Call dispose to release resources
+        structure.dispose(); 
         assertTrue("Texture should be disposed", structure.isDestroyed());
     }
 
     @Test
     public void testHealthAfterDestruction() {
-        structure.applyDamage(50); // Apply partial damage
+        structure.applyDamage(50); 
         assertEquals("Health should be 50 after taking 50 damage", 50, structure.getHealth());
 
-        structure.applyDamage(60); // Apply more damage than remaining health
+        structure.applyDamage(60);
         assertTrue("Structure should be destroyed after health reaches 0", structure.isDestroyed());
     }
 
     @Test
     public void testPosition() {
-        // The structure is created at (10, 10) in the world, verify this
+      
         assertEquals("Structure should be at X position 10", 10f, structure.getPosition().x, 0.01f);
         assertEquals("Structure should be at Y position 10", 10f, structure.getPosition().y, 0.01f);
     }
 
     @Test
     public void testReduceHealth() {
-        structure.reduceHealth(20); // Reduce health by 20
+        structure.reduceHealth(20); 
         assertEquals("Health should be reduced by 20", 80, structure.getHealth());
 
-        structure.reduceHealth(80); // Reduce health by 80, total damage of 100
+        structure.reduceHealth(80);
         assertTrue("Structure should be destroyed after total damage of 100", structure.isDestroyed());
     }
 }
